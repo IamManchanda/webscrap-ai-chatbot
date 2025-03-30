@@ -126,6 +126,26 @@ async function ingest(baseUrl = "") {
 // Execute below line only when you want to ingest data
 // ingest("https://www.harrymanchanda.com/");
 
+async function chat(query = "") {
+  const queryEmbedding = await generateVectorEmbeddings({ text: query });
+  const collection = await chromaClient.getOrCreateCollection({
+    name: WEB_COLLECTION,
+  });
+  const collectionResult = await collection.query({
+    nResults: 10,
+    queryEmbeddings: [queryEmbedding],
+  });
+  const urls = collectionResult.metadatas[0]
+    .map((e) => e.url)
+    .filter((e) => e.trim() !== "" && !!e);
+
+  console.log({
+    urls,
+  });
+}
+
+chat("Who is Harry Manchanda?");
+
 function chunkText(text, chunkSize) {
   if (!text || chunkSize <= 0) return [];
 
